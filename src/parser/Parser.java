@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Parser {
-    private final String template;
+    private final String format;
 
     private static final Pattern RANGE_PATTERN = Pattern.compile("\\[\\d+\\.\\.\\d+]");
     private static final String RANGE_DELIM = "\\.\\.";
@@ -15,8 +15,8 @@ public class Parser {
     private static final Pattern LIST_PATTERN = Pattern.compile("\\{([^|]+?\\|?)+?}");
     private static final String LIST_DELIM = "\\|";
 
-    public Parser(final @NotNull String pattern) {
-        this.template = pattern;
+    public Parser(final @NotNull String format) {
+        this.format = format;
     }
 
     /*
@@ -26,7 +26,7 @@ public class Parser {
      */
 
     public String createEquation(Random random) {
-        String equation = template;
+        String equation = format;
         Matcher range_matcher = RANGE_PATTERN.matcher(equation);
 
         // process ranges
