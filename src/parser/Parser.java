@@ -45,7 +45,18 @@ public class Parser {
         }
 
         // process lists
+        Matcher list_matcher = LIST_PATTERN.matcher(equation);
+        while (list_matcher.find()) {
+            int start = list_matcher.start();
+            int end = list_matcher.end();
 
+            String list = equation.substring(start + 1, end - 1); // cutting [ and ]
+            String[] values = list.split(LIST_DELIM);
+            int randomIndex = random.nextInt(values.length);
+
+            equation = list_matcher.replaceFirst(values[randomIndex]);
+            list_matcher.reset(equation);
+        }
         return equation;
     }
 }
