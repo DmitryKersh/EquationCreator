@@ -3,6 +3,11 @@ package com.app;
 import math_utils.Rational;
 import parser.Parser;
 
+import javax.imageio.IIOException;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -23,8 +28,14 @@ public class Main {
         Random r = new Random();
         Parser p = new Parser(format);
 
-        for (int i = 1; i <= numberOfTasks; i++){
-            System.out.println(i + ". " + p.createEquation(r));
+        try {
+            FileOutputStream fileOut = new FileOutputStream("output.txt");
+            fileOut.write(("FORMAT:\n" + format + "\n\nTASKS:\n").getBytes(StandardCharsets.UTF_8));
+            for (int i = 1; i <= numberOfTasks; i++){
+                fileOut.write((i + ". " + p.createEquation(r) + "\n").getBytes(StandardCharsets.UTF_8));
+            }
+        } catch (IOException exception){
+            System.out.println(exception.getMessage());
         }
     }
 }

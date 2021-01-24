@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Parser {
-    private final String format;
+    private String format;
 
     private static final Pattern RANGE_PATTERN = Pattern.compile("\\[\\d+\\.\\.\\d+]");
     private static final String RANGE_DELIM = "\\.\\.";
@@ -16,6 +16,10 @@ public class Parser {
     private static final String LIST_DELIM = "\\|";
 
     public Parser(final @NotNull String format) {
+        this.format = format;
+    }
+
+    public void setFormat(final @NotNull String format){
         this.format = format;
     }
 
