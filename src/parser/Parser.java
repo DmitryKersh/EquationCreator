@@ -1,0 +1,51 @@
+package parser;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class Parser {
+    private final String template;
+
+    private static final Pattern RANGE_PATTERN = Pattern.compile("\\[\\d+\\.\\.\\d+]");
+    private static final String RANGE_DELIM = "\\.\\.";
+
+    private static final Pattern LIST_PATTERN = Pattern.compile("\\{([^|]+\\|?)+\\}");
+    private static final String LIST_DELIM = "\\|";
+
+    public Parser(final @NotNull String pattern) {
+        this.template = pattern;
+    }
+
+    /*
+    Format:
+        random integer from a to b: [a..b]
+        random item from list: {+|abc|*|:|qwerty|asd}
+     */
+
+    public String createEquation(Random random) {
+        String equation = template;
+        Matcher range_matcher = RANGE_PATTERN.matcher(equation);
+
+        // process ranges
+        while (range_matcher.find()) {
+            int start = range_matcher.start();
+            int end = range_matcher.end();
+
+            String range = equation.substring(start + 1, end - 1); // cutting [ and ]
+            String[] values = range.split(RANGE_DELIM);
+
+            int randomInt = Integer.parseInt(values[0]) +
+                    random.nextInt(Integer.parseInt(values[1]) - Integer.parseInt(values[0]));
+
+            equation = range_matcher.replaceFirst(String.valueOf(randomInt));
+            range_matcher.reset(equation);
+        }
+
+        // process lists
+
+        return equation;
+    }
+}

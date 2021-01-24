@@ -18,6 +18,21 @@ public class Rational {
         reduce();
     }
 
+    public void print(){
+        System.out.print(numerator_);
+        if (denominator_ != 1){
+            System.out.print("/" + denominator_);
+        }
+    }
+
+    public void printAsDouble(int precision){
+        System.out.format("%." + precision + "f", getAsDouble());
+    }
+
+    public double getAsDouble(){
+        return (double)numerator_ / denominator_;
+    }
+
     public void add(final @NotNull Rational other){
         if (denominator_ == other.denominator_){
             numerator_ += other.numerator_;
@@ -55,8 +70,8 @@ public class Rational {
     }
 
     private static int gcd(int a, int b){
-        if (a * b == 0)
-            return Math.max(a, b);
+        if (a == 0 || b == 0)
+            return Math.max(Math.max(a, b), 1);
         return gcd(b, a % b);
     }
 
