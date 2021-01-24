@@ -12,7 +12,7 @@ public class Parser {
     private static final Pattern RANGE_PATTERN = Pattern.compile("\\[\\d+\\.\\.\\d+]");
     private static final String RANGE_DELIM = "\\.\\.";
 
-    private static final Pattern LIST_PATTERN = Pattern.compile("\\{([^|]+\\|?)+\\}");
+    private static final Pattern LIST_PATTERN = Pattern.compile("\\{([^|]+?\\|?)+?}");
     private static final String LIST_DELIM = "\\|";
 
     public Parser(final @NotNull String pattern) {
