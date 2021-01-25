@@ -1,4 +1,4 @@
-package parser;
+package com.github.dmitrykersh.equationcreator.parser;
 
 import org.jetbrains.annotations.NotNull;
 

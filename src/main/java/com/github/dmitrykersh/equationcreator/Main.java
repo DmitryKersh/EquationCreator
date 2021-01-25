@@ -1,10 +1,7 @@
-package com.app;
+package com.github.dmitrykersh.equationcreator;
 
-import math_utils.Rational;
-import parser.Parser;
+import com.github.dmitrykersh.equationcreator.parser.Parser;
 
-import javax.imageio.IIOException;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

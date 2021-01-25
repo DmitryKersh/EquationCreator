@@ -1,4 +1,4 @@
-package math_utils;
+package com.github.dmitrykersh.math;
 
 import org.jetbrains.annotations.NotNull;
 
