@@ -1,8 +1,8 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="Equation creator:jar">
+  <artifact type="jar" name="Equation_creator:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Equation_creator_jar</output-path>
     <root id="archive" name="Equation creator.jar">
-      <element id="module-output" name="Equation creator" />
+      <element id="module-output" name="Equation_creator" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/jetbrains/annotations/20.1.0/annotations-20.1.0.jar" path-in-jar="/" />
     </root>
   </artifact>
