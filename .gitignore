@@ -1,1 +1,7 @@
 /.idea/
+
+/.gradle/
+
+/out/
+
+/src/META-INF/MANIFEST.MF
