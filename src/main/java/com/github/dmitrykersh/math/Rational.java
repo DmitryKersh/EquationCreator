@@ -18,12 +18,11 @@ public class Rational {
         reduce();
     }
 
-    public void print(){
-        System.out.print(numerator_);
-        if (denominator_ != 1){
-            System.out.print("/" + denominator_);
-        }
+    @Override
+    public String toString(){
+        return numerator_ + (denominator_ != 1 ? "/" + denominator_ : "");
     }
+
 
     public void printAsDouble(int precision){
         System.out.format("%." + precision + "f", getAsDouble());
