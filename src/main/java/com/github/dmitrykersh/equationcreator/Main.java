@@ -9,17 +9,20 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
-    private static final String HINT = "Enter format string and number of tasks.\n"
+    private static final String FORMAT_HINT = "Enter format string.\n"
             + "Formatting:\n"
             + "\tRandom number between X and Y: [X..Y]\n"
             + "\tRandom char/string from list: {string1|char2|string3}\n";
 
-    public static void main(String[] args) {
-        System.out.println(HINT);
+    private static final String TASKNUM_HINT = "\nEnter number of tasks.\n";
 
+    public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
+        System.out.println(FORMAT_HINT);
         String format = scanner.nextLine();
+
+        System.out.println(TASKNUM_HINT);
         int numberOfTasks = scanner.nextInt();
 
         Random r = new Random();
