@@ -3,6 +3,8 @@ package com.github.dmitrykersh.equationcreator.parser;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +27,14 @@ public class Parser {
     private static final Pattern LIST_PATTERN = Pattern.compile("\\{([^|{}]+?\\|?)+?}");
     private static final String LIST_DELIM = "\\|";
 
+    // VARIABLES
+    // define: a=<[1..10]> -- a is random number in 1-9
+    // use: <a> -- this will be replaced with value of a
+    private static final Pattern VAR_DEFINITION_PATTERN = Pattern.compile("[a-zA-Z]+=<[^<>]+>");
+    private static final Pattern VAR_USAGE_PATTERN = Pattern.compile("<[a-zA-Z]+>");
+
+    private static final String VAR_NOT_DEFINED_WARN = "UNDEFINED VARIABLE: ";
+
     public Parser(final @NotNull String format) {
         this.format = format;
     }
@@ -41,6 +51,51 @@ public class Parser {
 
     public String createEquation(Random random) {
         String equation = format;
+
+        // parse variable definition
+        Map<String, String> variables = new HashMap<>();
+        Matcher var_def_matcher = VAR_DEFINITION_PATTERN.matcher(equation);
+
+        while (var_def_matcher.find()){
+            int start = var_def_matcher.start();
+            int end = var_def_matcher.end();
+
+            String range = equation.substring(start, end);
+
+            // words[0] - variable name, words[1] - value
+            String[] words = range.split("=");
+
+            // cutting braces <>
+            words[1] = words[1].substring(1, words[1].length() - 1);
+
+            Parser valueParser = new Parser(words[1]);
+            String value = valueParser.createEquation(random);
+
+            variables.put(words[0], value);
+
+            equation = var_def_matcher.replaceFirst(value);
+            var_def_matcher.reset(equation);
+        }
+
+        // parse variable usage
+        Matcher var_use_matcher = VAR_USAGE_PATTERN.matcher(equation);
+
+        while (var_use_matcher.find()){
+            int start = var_use_matcher.start();
+            int end = var_use_matcher.end();
+
+            String var_name = equation.substring(start + 1, end - 1);
+            String replacement = "";
+
+            if (variables.containsKey(var_name)){
+                replacement = variables.get(var_name);
+            } else {
+                replacement = VAR_NOT_DEFINED_WARN.concat(var_name);
+            }
+
+            equation = var_use_matcher.replaceFirst(replacement);
+            var_use_matcher.reset(equation);
+        }
 
         // parse float ranges
         Matcher float_range_matcher = FLOAT_RANGE_PATTERN.matcher(equation);
