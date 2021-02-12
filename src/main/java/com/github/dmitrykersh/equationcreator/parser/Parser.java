@@ -100,7 +100,11 @@ public class Parser {
         Matcher int_range_matcher = INT_RANGE_PATTERN.matcher(equation);
         Matcher list_matcher = LIST_PATTERN.matcher(equation);
 
-        while (float_range_matcher.find() || int_range_matcher.find() || list_matcher.find()){
+        boolean anyPatternFound = true;
+
+        while (anyPatternFound){
+            anyPatternFound = false;
+
             float_range_matcher.reset(equation);
             int_range_matcher.reset(equation);
             list_matcher.reset(equation);
@@ -145,6 +149,7 @@ public class Parser {
 
                 equation = float_range_matcher.replaceFirst(decimalFormat.format(randomInRange));
                 float_range_matcher.reset(equation);
+                anyPatternFound = true;
             }
 
             // parse integer ranges
@@ -160,6 +165,7 @@ public class Parser {
 
                 equation = int_range_matcher.replaceFirst(String.valueOf(randomInt));
                 int_range_matcher.reset(equation);
+                anyPatternFound = true;
             }
 
             // parse lists
@@ -173,13 +179,9 @@ public class Parser {
 
                 equation = list_matcher.replaceFirst(values[randomIndex]);
                 list_matcher.reset(equation);
+                anyPatternFound = true;
             }
-            float_range_matcher.reset(equation);
-            int_range_matcher.reset(equation);
-            list_matcher.reset(equation);
         }
-
-
 
         return equation;
     }
