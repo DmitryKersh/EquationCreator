@@ -133,3 +133,4 @@ buildNumber.properties
 .gradle
 
 output.txt
+package-info.java
