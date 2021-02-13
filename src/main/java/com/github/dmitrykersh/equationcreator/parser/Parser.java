@@ -189,7 +189,7 @@ public class Parser {
                 String[] values = range.split(RANGE_DELIM);
 
                 int randomInt = Integer.parseInt(values[0]) +
-                        random.nextInt(Integer.parseInt(values[1]) - Integer.parseInt(values[0]));
+                        random.nextInt(Integer.parseInt(values[1]) - Integer.parseInt(values[0]) + 1);
 
                 equation = int_range_matcher.replaceFirst(String.valueOf(randomInt));
                 int_range_matcher.reset(equation);
