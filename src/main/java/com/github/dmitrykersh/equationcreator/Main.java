@@ -10,9 +10,18 @@ import java.util.Scanner;
 
 public class Main {
     private static final String FORMAT_HINT = "Enter format string.\n"
-            + "Formatting:\n"
-            + "\tRandom number between X and Y: [X..Y]\n"
-            + "\tRandom char/string from list: {string1|char2|string3}\n";
+            + "Formatting:"
+            + "\n\tVariable definition: name=<value>"
+            + "\n\tVariable usage: <name>"
+            + "\n\tIf your variable <sign> is [+ - * /] and you need opposite sign: <!sign>"
+            + "\n\t--------------------------------------------------------"
+            + "\n\tTo perform in-line math operations as [+ - * / ^] "
+            + "\n\tuse $ prefix and no spaces between anything: 10$+11 -> 21"
+            + "\n\t--------------------------------------------------------"
+            + "\n\tRandom integer between X and Y: [X..Y]"
+            + "\n\tRandom float between X and Y dividable by D: [X..Y|:D]"
+            + "\n\tRandom float between X and Y wits step S: [X..Y|S]"
+            + "\n\tRandom item from list: {string1|char2|[1..10]}";
 
     private static final String TASKNUM_HINT = "\nEnter number of tasks.\n";
 

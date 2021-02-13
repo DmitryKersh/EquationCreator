@@ -17,11 +17,11 @@ public class Parser {
     // [1.1..2.55|0.2] = 1.1, 1.3, ... , 2.5 (step 0.2)
     // [1.1..2.55|:0.2] = 1.2, 1.4, ... , 2.4 (dividable by 0.2)
     private static final Pattern FLOAT_RANGE_PATTERN =
-            Pattern.compile("\\[\\d+(\\.\\d+)?\\.\\.\\d+(\\.\\d+)?\\|:?\\d+(\\.\\d+)?]");
+            Pattern.compile("\\[-?\\d+(\\.\\d+)?\\.\\.-?\\d+(\\.\\d+)?\\|:?-?\\d+(\\.\\d+)?]");
     private static final String FLOAT_RANGE_STEP_DELIM = "\\|";
 
     // [12..23]
-    private static final Pattern INT_RANGE_PATTERN = Pattern.compile("\\[\\d+\\.\\.\\d+]");
+    private static final Pattern INT_RANGE_PATTERN = Pattern.compile("\\[-?\\d+\\.\\.-?\\d+]");
 
     // {a|bc|def|{x|y|z}}
     private static final Pattern LIST_PATTERN = Pattern.compile("\\{([^|{}]+?\\|?)+?}");
@@ -31,16 +31,18 @@ public class Parser {
     // define: a=<[1..10]> -- a is random number in 1-9
     // use: <a> -- this will be replaced with value of a
     private static final Pattern VAR_DEFINITION_PATTERN = Pattern.compile("[a-zA-Z]+=<[^<>]+>");
-    private static final Pattern VAR_USAGE_PATTERN = Pattern.compile("<[a-zA-Z]+>");
+    private static final Pattern VAR_USAGE_PATTERN = Pattern.compile("<!?[a-zA-Z]+>");
 
     // arithmetics
     // to use arithmetic signs for their purpose, use $
     // 12$+23 will be replaced with 35
-    private static final Pattern ARITH_BRACKETS_PATTERN = Pattern.compile("\\(\\d+(\\.\\d+)?(\\$[+\\-/*]\\d+(\\.\\d+)?)+\\)");
-    private static final Pattern ARITH_NO_BRACKETS_PATTERN = Pattern.compile("\\d+(\\.\\d+)?(\\$[+\\-/*]\\d+(\\.\\d+)?)+");
-    private static final Pattern ARITH_PRIOR_1 = Pattern.compile("\\d+(\\.\\d+)?\\$\\^\\d+(\\.\\d+)?");
-    private static final Pattern ARITH_PRIOR_2 = Pattern.compile("\\d+(\\.\\d+)?\\$[*/]\\d+(\\.\\d+)?");
-    private static final Pattern ARITH_PRIOR_3 = Pattern.compile("\\d+(\\.\\d+)?\\$[+-]\\d+(\\.\\d+)?");
+    private static final Pattern ARITH_BRACKETS_PATTERN = Pattern
+            .compile("\\(-?\\d+(\\.\\d+)?(\\$[+\\-/*]-?\\d+(\\.\\d+)?)+\\)");
+    private static final Pattern ARITH_NO_BRACKETS_PATTERN = Pattern
+            .compile("-?\\d+(\\.\\d+)?(\\$[+\\-/*]-?\\d+(\\.\\d+)?)+");
+    private static final Pattern ARITH_PRIOR_1 = Pattern.compile("-?\\d+(\\.\\d+)?\\$\\^-?\\d+(\\.\\d+)?");
+    private static final Pattern ARITH_PRIOR_2 = Pattern.compile("-?\\d+(\\.\\d+)?\\$[*/]-?\\d+(\\.\\d+)?");
+    private static final Pattern ARITH_PRIOR_3 = Pattern.compile("-?\\d+(\\.\\d+)?\\$[+-]-?\\d+(\\.\\d+)?");
 
     private static final String ARITH_SIGN_PREFIX = "\\$";
 
@@ -98,14 +100,22 @@ public class Parser {
 
             // parse variable usage
             var_use_matcher.reset(equation);
-            while (var_use_matcher.find()){
+            while (var_use_matcher.find()) {
                 int start = var_use_matcher.start();
                 int end = var_use_matcher.end();
 
+                boolean isNegative = false;
+
                 String var_name = equation.substring(start + 1, end - 1);
 
+                if (var_name.startsWith("!")) {
+                    var_name = var_name.substring(1);
+                    isNegative = true;
+                }
+
                 if (variables.containsKey(var_name)) {
-                    equation = var_use_matcher.replaceFirst(variables.get(var_name));
+                    String var_value = variables.get(var_name);
+                    equation = var_use_matcher.replaceFirst(isNegative ? negateValue(var_value) : var_value);
                     anyVariableFound = true;
                 } else break;
 
@@ -231,6 +241,16 @@ public class Parser {
         }
 
         return equation;
+    }
+
+    private String negateValue(final @NotNull String value){
+        switch (value){
+            case "+": return "-";
+            case "-": return "+";
+            case "/": return "*";
+            case "*": return "/";
+            default: return value;
+        }
     }
 
     private String evaluateSimpleEquation(final @NotNull String str){
