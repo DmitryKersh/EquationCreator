@@ -320,7 +320,7 @@ public class Parser {
             int end = prior3_matcher.end();
 
             String operation = s.substring(start, end);
-            String[] values = s.split(ARITH_SIGN_PREFIX);
+            String[] values = operation.split(ARITH_SIGN_PREFIX);
 
 
             char operator = values[1].charAt(0);
