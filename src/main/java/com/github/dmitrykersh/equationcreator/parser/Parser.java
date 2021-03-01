@@ -14,10 +14,12 @@ public class Parser {
 
     private static final String RANGE_DELIM = "\\.\\.";
 
+    private static final String DECIMAL = "-?\\d+(\\.\\d+)?";
+
     // [1.1..2.55|0.2] = 1.1, 1.3, ... , 2.5 (step 0.2)
     // [1.1..2.55|:0.2] = 1.2, 1.4, ... , 2.4 (dividable by 0.2)
     private static final Pattern FLOAT_RANGE_PATTERN =
-            Pattern.compile("\\[-?\\d+(\\.\\d+)?\\.\\.-?\\d+(\\.\\d+)?\\|:?-?\\d+(\\.\\d+)?]");
+            Pattern.compile("\\[" + DECIMAL + "\\.\\." + DECIMAL +"\\|:?" + DECIMAL + "]");
     private static final String FLOAT_RANGE_STEP_DELIM = "\\|";
 
     // [12..23]
@@ -37,12 +39,13 @@ public class Parser {
     // to use arithmetic signs for their purpose, use $
     // 12$+23 will be replaced with 35
     private static final Pattern ARITH_BRACKETS_PATTERN = Pattern
-            .compile("\\(-?\\d+(\\.\\d+)?(\\$[+\\-/*]-?\\d+(\\.\\d+)?)+\\)");
+            .compile("\\(" + DECIMAL + "(\\$[+\\-/*\\^]" + DECIMAL + ")+\\)");
     private static final Pattern ARITH_NO_BRACKETS_PATTERN = Pattern
-            .compile("-?\\d+(\\.\\d+)?(\\$[+\\-/*]-?\\d+(\\.\\d+)?)+");
-    private static final Pattern ARITH_PRIOR_1 = Pattern.compile("-?\\d+(\\.\\d+)?\\$\\^-?\\d+(\\.\\d+)?");
-    private static final Pattern ARITH_PRIOR_2 = Pattern.compile("-?\\d+(\\.\\d+)?\\$[*/]-?\\d+(\\.\\d+)?");
-    private static final Pattern ARITH_PRIOR_3 = Pattern.compile("-?\\d+(\\.\\d+)?\\$[+-]-?\\d+(\\.\\d+)?");
+            .compile(DECIMAL + "(\\$[+\\-/*\\^]" + DECIMAL + ")+");
+
+    private static final Pattern ARITH_PRIOR_1 = Pattern.compile(DECIMAL + "\\$\\^" + DECIMAL);
+    private static final Pattern ARITH_PRIOR_2 = Pattern.compile(DECIMAL + "\\$[*/]" + DECIMAL);
+    private static final Pattern ARITH_PRIOR_3 = Pattern.compile(DECIMAL + "\\$[+-]" + DECIMAL);
 
     private static final String ARITH_SIGN_PREFIX = "\\$";
 
@@ -243,7 +246,7 @@ public class Parser {
         return equation;
     }
 
-    private String negateValue(final @NotNull String value){
+    protected String negateValue(final @NotNull String value){
         switch (value){
             case "+": return "-";
             case "-": return "+";
@@ -253,7 +256,7 @@ public class Parser {
         }
     }
 
-    private String evaluateSimpleEquation(final @NotNull String str){
+    protected String evaluateSimpleEquation(final @NotNull String str){
         String s = new String(str);
         Matcher prior1_matcher = ARITH_PRIOR_1.matcher(s);
 
