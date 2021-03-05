@@ -66,4 +66,49 @@ class ParserTest {
         // 13 - 12 + 11*10 - 22*5 + 99 + 2^2^2^2 (= 356)
         assertEquals("356", parser.evaluateSimpleEquation("13 $- 12 $+ 11 $* 10 $- 22 $* 5 $+ 99 $+ 2 $^ 2 $^ 2 $^ 2"));
     }
+
+    @Test
+    public void createEquation_NO_PARSING() {
+
+    }
+
+    @Test
+    public void createEquation_INT_RANGE() {
+
+    }
+
+    @Test
+    public void createEquation_FLOAT_RANGE_STEP() {
+
+    }
+
+    @Test
+    public void createEquation_FLOAT_RANGE_DIVISOR() {
+
+    }
+
+    @Test
+    public void createEquation_LIST() {
+
+    }
+
+    @Test
+    public void createEquation_INNER_ELEMENTS() {
+
+    }
+
+    @Test
+    public void createEquation_VARIABLES() {
+
+    }
+
+    @Test
+    public void createEquation_INNER_VARIABLES() {
+
+    }
+
+    @Test
+    public void createEquation_EVERYTHING() {
+
+    }
 }
