@@ -13,6 +13,7 @@ public class Parser {
     private String format;
 
     private static final String RANGE_DELIM = "\\.\\.";
+    private static final String DIGIT = "[\\d\\-]";
 
     private static final String DECIMAL = "-?\\d+(\\.\\d+)?";
 
@@ -173,7 +174,8 @@ public class Parser {
                     randomInRange = val0 + stepCount * step;
                 }
 
-                String decimalFormatPattern = String.valueOf(step_split[1]).replaceAll("\\d", "#");
+                String decimalFormatPattern = String.valueOf(step_split[1]).replaceAll(DIGIT, "#");
+
                 DecimalFormat decimalFormat = new DecimalFormat(decimalFormatPattern);
 
                 equation = float_range_matcher.replaceFirst(decimalFormat.format(randomInRange));
@@ -272,7 +274,7 @@ public class Parser {
 
             Double res = Math.pow(op1, op2);
 
-            String decimalFormatPattern = String.valueOf(res).replaceAll("[\\d\\-]", "#");
+            String decimalFormatPattern = String.valueOf(res).replaceAll(DIGIT, "#");
             DecimalFormat decimalFormat = new DecimalFormat(decimalFormatPattern);
 
             s = prior1_matcher.replaceFirst(decimalFormat.format(res));
@@ -306,7 +308,7 @@ public class Parser {
                     break;
                 }
             }
-            String decimalFormatPattern = String.valueOf(res).replaceAll("[\\d\\-]", "#");
+            String decimalFormatPattern = String.valueOf(res).replaceAll(DIGIT, "#");
             DecimalFormat decimalFormat = new DecimalFormat(decimalFormatPattern);
 
             s = prior2_matcher.replaceFirst(decimalFormat.format(res));
@@ -340,7 +342,7 @@ public class Parser {
                     break;
                 }
             }
-            String decimalFormatPattern = String.valueOf(res).replaceAll("[\\d\\-]", "#");
+            String decimalFormatPattern = String.valueOf(res).replaceAll(DIGIT, "#");
             DecimalFormat decimalFormat = new DecimalFormat(decimalFormatPattern);
 
             s = prior3_matcher.replaceFirst(decimalFormat.format(res));
