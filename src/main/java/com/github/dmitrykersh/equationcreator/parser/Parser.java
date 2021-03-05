@@ -39,13 +39,13 @@ public class Parser {
     // to use arithmetic signs for their purpose, use $
     // 12$+23 will be replaced with 35
     private static final Pattern ARITH_BRACKETS_PATTERN = Pattern
-            .compile("\\(" + DECIMAL + "(\\$[+\\-/*\\^]" + DECIMAL + ")+\\)");
+            .compile("\\(" + DECIMAL + "(\\s\\$[+\\-/*\\^]\\s" + DECIMAL + ")+\\)");
     private static final Pattern ARITH_NO_BRACKETS_PATTERN = Pattern
-            .compile(DECIMAL + "(\\$[+\\-/*\\^]" + DECIMAL + ")+");
+            .compile(DECIMAL + "(\\s\\$[+\\-/*\\^]\\s" + DECIMAL + ")+");
 
-    private static final Pattern ARITH_PRIOR_1 = Pattern.compile(DECIMAL + "\\$\\^" + DECIMAL);
-    private static final Pattern ARITH_PRIOR_2 = Pattern.compile(DECIMAL + "\\$[*/]" + DECIMAL);
-    private static final Pattern ARITH_PRIOR_3 = Pattern.compile(DECIMAL + "\\$[+-]" + DECIMAL);
+    private static final Pattern ARITH_PRIOR_1 = Pattern.compile(DECIMAL + "\\s\\$\\^\\s" + DECIMAL);
+    private static final Pattern ARITH_PRIOR_2 = Pattern.compile(DECIMAL + "\\s\\$[*/]\\s" + DECIMAL);
+    private static final Pattern ARITH_PRIOR_3 = Pattern.compile(DECIMAL + "\\s\\$[+-]\\s" + DECIMAL);
 
     private static final String ARITH_SIGN_PREFIX = "\\$";
 
