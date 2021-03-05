@@ -69,7 +69,9 @@ class ParserTest {
 
     @Test
     public void createEquation_NO_PARSING() {
+        Parser parser = new Parser("");
 
+        parser.setFormat("");
     }
 
     @Test
