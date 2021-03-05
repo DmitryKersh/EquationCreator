@@ -27,11 +27,11 @@ class ParserTest {
         Parser parser = new Parser("abc");
 
         // only $-operations
-        assertEquals(parser.evaluateSimpleEquation("2$+3"), "5");
-        assertEquals(parser.evaluateSimpleEquation("12$-6"), "6");
-        assertEquals(parser.evaluateSimpleEquation("2$^3"), "8");
-        assertEquals(parser.evaluateSimpleEquation("12$-6$*3"), "-6");
-        assertEquals(parser.evaluateSimpleEquation("12$/6$*3"), "6");
+        assertEquals("5", parser.evaluateSimpleEquation("2 $+ 3"));
+        assertEquals("6", parser.evaluateSimpleEquation("12 $- 6"));
+        assertEquals("8", parser.evaluateSimpleEquation("2 $^ 3"));
+        assertEquals("-6", parser.evaluateSimpleEquation("12 $- 6 $* 3"));
+        assertEquals("6", parser.evaluateSimpleEquation("12 $/ 6 $* 3"));
     }
 
     @Test
@@ -39,9 +39,10 @@ class ParserTest {
         Parser parser = new Parser("abc");
 
         // invalid input:
-        assertEquals(parser.evaluateSimpleEquation("2+3"), "2+3");
-        assertEquals(parser.evaluateSimpleEquation("12-6as"), "12-6as");
-        assertEquals(parser.evaluateSimpleEquation("2^$3"), "2^$3");
+        assertEquals("2 + 3", parser.evaluateSimpleEquation("2 + 3"));
+        assertEquals("12 - 6as", parser.evaluateSimpleEquation("12 - 6as"));
+        assertEquals("2 ^$ 3", parser.evaluateSimpleEquation("2 ^$ 3"));
+        assertEquals("2$^3", parser.evaluateSimpleEquation("2$^3"));
     }
 
     @Test
@@ -50,9 +51,9 @@ class ParserTest {
 
         // mixed $-operations, arithmetic signs and other shit
         // only $-operations should be touched
-        assertEquals(parser.evaluateSimpleEquation("13$-6*3"), "7*3");
-        assertEquals(parser.evaluateSimpleEquation("12a$+12-1"), "12a$+12-1");
-        assertEquals(parser.evaluateSimpleEquation("12d$+4$-1"), "12d$+3");
+        assertEquals("7 * 3", parser.evaluateSimpleEquation("13 $- 6 * 3"));
+        assertEquals("12a $+ 12 - 1", parser.evaluateSimpleEquation("12a $+ 12 - 1"));
+        assertEquals("12d $+ 3", parser.evaluateSimpleEquation("12d $+ 4 $- 1"));
     }
 
     @Test
@@ -60,9 +61,9 @@ class ParserTest {
         Parser parser = new Parser("abc");
 
         // 2^5 - 10*2 + 2 + 3^2 * 2 (= 32)
-        assertEquals(parser.evaluateSimpleEquation("2$^5$-10$*2$+2$+3$^2$*2"), "32");
+        assertEquals("32", parser.evaluateSimpleEquation("2 $^ 5 $- 10 $* 2 $+ 2 $+ 3 $^ 2 $* 2"));
 
         // 13 - 12 + 11*10 - 22*5 + 99 + 2^2^2^2 (= 356)
-        assertEquals(parser.evaluateSimpleEquation("13$-12$+11$*10$-22$*5$+99$+2$^2$^2$^2"), "356");
+        assertEquals("356", parser.evaluateSimpleEquation("13 $- 12 $+ 11 $* 10 $- 22 $* 5 $+ 99 $+ 2 $^ 2 $^ 2 $^ 2"));
     }
 }
