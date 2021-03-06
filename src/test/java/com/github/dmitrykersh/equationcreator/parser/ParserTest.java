@@ -12,7 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ParserTest {
-    private static Random random = new Random();
+    private static final Random random = new Random();
+    private static final Parser parser = new Parser("");
 
     @ParameterizedTest
     @CsvSource({
@@ -20,85 +21,61 @@ class ParserTest {
                        "-, +",
                        "*, /",
                        "/, *",
-                       "abc, abc"})
+                       "abc, abc"
+               })
     public void negateValue_ALL_IN_ONE(String arg, String res) {
         assertEquals(res, Parser.negateValue(arg));
     }
 
-    @Test
-    public void evaluateSimpleEquation_VALID_INPUT() {
-        Map<String, String> cases = new HashMap<>();
-
-        cases.put("5", "2 $+ 3");
-        cases.put("6", "12 $- 6");
-        cases.put("8", "2 $^ 3");
-        cases.put("-6", "12 $- 6 $* 3");
-        cases.put("-1", "12 $/ 6 $- 3");
-
-        for (Map.Entry<String, String> testcase : cases.entrySet())
-            assertEquals(testcase.getKey(), Parser.evaluateSimpleEquation(testcase.getValue()));
+    @ParameterizedTest
+    @CsvSource({
+                       "2 $+ 3, 5",
+                       "12 $- 6, 6",
+                       "2 $^ 3, 8",
+                       "12 $- 6 $* 3, -6",
+                       "12 $/ 6 $- 3, -1",
+               })
+    public void evaluateSimpleEquation_VALID_INPUT(String arg, String res) {
+        assertEquals(res, Parser.evaluateSimpleEquation(arg));
     }
 
-    @Test
-    public void evaluateSimpleEquation_WRONG_INPUT() {
-        Map<String, String> cases = new HashMap<>();
-
-        cases.put("2 + 3", "2 + 3");
-        cases.put("12 - 6as", "12 - 6as");
-        cases.put("2 ^$ 3", "2 ^$ 3");
-        cases.put("2$^3", "2$^3");
-
-        for (Map.Entry<String, String> testcase : cases.entrySet())
-            assertEquals(testcase.getKey(), Parser.evaluateSimpleEquation(testcase.getValue()));
-
+    @ParameterizedTest
+    @ValueSource(strings = {"2 + 3", "12 - 6as", "2 ^$ 3", "2$^3"})
+    public void evaluateSimpleEquation_WRONG_INPUT(String arg) {
+        assertEquals(arg, Parser.evaluateSimpleEquation(arg));
     }
 
-    @Test
-    public void evaluateSimpleEquation_MIXED_INPUT() {
+    @ParameterizedTest
+    @CsvSource({
+                       "13 $- 6 * 3, 7 * 3",
+                       "12a $+ 12 - 1, 12a $+ 12 - 1",
+                       "12d $+ 4 $- 1, 12d $+ 3",
+               })
+    public void evaluateSimpleEquation_MIXED_INPUT(String arg, String res) {
         // mixed $-operations, arithmetic signs and other shit
         // only $-operations should be touched
-
-        Map<String, String> cases = new HashMap<>();
-
-        cases.put("7 * 3", "13 $- 6 * 3");
-        cases.put("12a $+ 12 - 1", "12a $+ 12 - 1");
-        cases.put("12d $+ 3", "12d $+ 4 $- 1");
-
-        for (Map.Entry<String, String> testcase : cases.entrySet())
-            assertEquals(testcase.getKey(), Parser.evaluateSimpleEquation(testcase.getValue()));
+        assertEquals(res, Parser.evaluateSimpleEquation(arg));
     }
 
-    @Test
-    public void evaluateSimpleEquation_LONG_EQUATIONS() {
-        Map<String, String> cases = new HashMap<>();
-
-        // 2^5 - 10*2 + 2 + 3^2 * 2 (= 32)
-        // 13 - 12 + 11*10 - 22*5 + 99 + 2^2^2^2 (= 356)
-        cases.put("32","2 $^ 5 $- 10 $* 2 $+ 2 $+ 3 $^ 2 $* 2");
-        cases.put("356", "13 $- 12 $+ 11 $* 10 $- 22 $* 5 $+ 99 $+ 2 $^ 2 $^ 2 $^ 2");
-
-        for (Map.Entry<String, String> testcase : cases.entrySet())
-            assertEquals(testcase.getKey(), Parser.evaluateSimpleEquation(testcase.getValue()));
+    @ParameterizedTest
+    @CsvSource({
+                       // 2^5 - 10*2 + 2 + 3^2 * 2 (= 32)
+                       // 13 - 12 + 11*10 - 22*5 + 99 + 2^2^2^2 (= 356)
+                       "2 $^ 5 $- 10 $* 2 $+ 2 $+ 3 $^ 2 $* 2, 32",
+                       "13 $- 12 $+ 11 $* 10 $- 22 $* 5 $+ 99 $+ 2 $^ 2 $^ 2 $^ 2, 356",
+               })
+    public void evaluateSimpleEquation_LONG_EQUATIONS(String arg, String res) {
+        assertEquals(res, Parser.evaluateSimpleEquation(arg));
     }
 
-    @Test
-    public void createEquation_NO_PARSING() {
-        List<String> cases = new LinkedList<>();
-
-        cases.add("Foo Bar Baz");
-        cases.add("Sample Text...");
-        cases.add("Not a range: [1..a]");
-        cases.add("Not a float range: [1..2|s]");
-        cases.add("31$-31");
-        cases.add("qwe rty uiop");
-        cases.add("Not a range: [1...4]");
-        cases.add("<thisIsUndefinedVariable>");
-
-        Parser parser = new Parser("");
-        for (String testcase : cases) {
-            parser.setFormat(testcase);
-            assertEquals(testcase, parser.createEquation(random));
-        }
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "Foo Bar Baz", "Sample Text...", "Not a range: [1..a]", "Not a float range: [1..2|s]",
+            "31$-31", "qwe rty uiop", "Not a range: [1...4]", "<thisIsUndefinedVariable>",
+    })
+    public void createEquation_NO_PARSING(String arg) {
+        parser.setFormat(arg);
+        assertEquals(arg, parser.createEquation(random));
     }
 
     @RepeatedTest(3)
