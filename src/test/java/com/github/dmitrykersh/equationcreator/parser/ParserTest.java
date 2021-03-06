@@ -1,92 +1,215 @@
 package com.github.dmitrykersh.equationcreator.parser;
 
-import org.jetbrains.annotations.NotNull;
-
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ParserTest {
+    private static Random random = new Random();
+
     @Test
     public void negateValue_ALL_IN_ONE() {
-        Parser parser = new Parser("abc");
+        Map<String, String> cases = new HashMap<>();
 
-        // these should change
-        assertEquals(parser.negateValue("+"), "-");
-        assertEquals(parser.negateValue("-"), "+");
-        assertEquals(parser.negateValue("*"), "/");
-        assertEquals(parser.negateValue("/"), "*");
+        cases.put("+", "-");
+        cases.put("-", "+");
+        cases.put("*", "/");
+        cases.put("/", "*");
+        cases.put("^", "^");
+        cases.put("+-=", "+-=");
 
-        // these remain unchanged
-        assertEquals(parser.negateValue("^"), "^");
-        assertEquals(parser.negateValue("a+bc"), "a+bc");
+        for (Map.Entry<String, String> testcase : cases.entrySet())
+            assertEquals(testcase.getKey(), Parser.negateValue(testcase.getValue()));
     }
 
     @Test
     public void evaluateSimpleEquation_VALID_INPUT() {
-        Parser parser = new Parser("abc");
+        Map<String, String> cases = new HashMap<>();
 
-        // only $-operations
-        assertEquals("5", parser.evaluateSimpleEquation("2 $+ 3"));
-        assertEquals("6", parser.evaluateSimpleEquation("12 $- 6"));
-        assertEquals("8", parser.evaluateSimpleEquation("2 $^ 3"));
-        assertEquals("-6", parser.evaluateSimpleEquation("12 $- 6 $* 3"));
-        assertEquals("6", parser.evaluateSimpleEquation("12 $/ 6 $* 3"));
+        cases.put("5", "2 $+ 3");
+        cases.put("6", "12 $- 6");
+        cases.put("8", "2 $^ 3");
+        cases.put("-6", "12 $- 6 $* 3");
+        cases.put("-1", "12 $/ 6 $- 3");
+
+        for (Map.Entry<String, String> testcase : cases.entrySet())
+            assertEquals(testcase.getKey(), Parser.evaluateSimpleEquation(testcase.getValue()));
     }
 
     @Test
     public void evaluateSimpleEquation_WRONG_INPUT() {
-        Parser parser = new Parser("abc");
+        Map<String, String> cases = new HashMap<>();
 
-        // invalid input:
-        assertEquals("2 + 3", parser.evaluateSimpleEquation("2 + 3"));
-        assertEquals("12 - 6as", parser.evaluateSimpleEquation("12 - 6as"));
-        assertEquals("2 ^$ 3", parser.evaluateSimpleEquation("2 ^$ 3"));
-        assertEquals("2$^3", parser.evaluateSimpleEquation("2$^3"));
+        cases.put("2 + 3", "2 + 3");
+        cases.put("12 - 6as", "12 - 6as");
+        cases.put("2 ^$ 3", "2 ^$ 3");
+        cases.put("2$^3", "2$^3");
+
+        for (Map.Entry<String, String> testcase : cases.entrySet())
+            assertEquals(testcase.getKey(), Parser.evaluateSimpleEquation(testcase.getValue()));
+
     }
 
     @Test
     public void evaluateSimpleEquation_MIXED_INPUT() {
-        Parser parser = new Parser("abc");
-
         // mixed $-operations, arithmetic signs and other shit
         // only $-operations should be touched
-        assertEquals("7 * 3", parser.evaluateSimpleEquation("13 $- 6 * 3"));
-        assertEquals("12a $+ 12 - 1", parser.evaluateSimpleEquation("12a $+ 12 - 1"));
-        assertEquals("12d $+ 3", parser.evaluateSimpleEquation("12d $+ 4 $- 1"));
+
+        Map<String, String> cases = new HashMap<>();
+
+        cases.put("7 * 3", "13 $- 6 * 3");
+        cases.put("12a $+ 12 - 1", "12a $+ 12 - 1");
+        cases.put("12d $+ 3", "12d $+ 4 $- 1");
+
+        for (Map.Entry<String, String> testcase : cases.entrySet())
+            assertEquals(testcase.getKey(), Parser.evaluateSimpleEquation(testcase.getValue()));
     }
 
     @Test
     public void evaluateSimpleEquation_LONG_EQUATIONS() {
-        Parser parser = new Parser("abc");
+        Map<String, String> cases = new HashMap<>();
 
         // 2^5 - 10*2 + 2 + 3^2 * 2 (= 32)
-        assertEquals("32", parser.evaluateSimpleEquation("2 $^ 5 $- 10 $* 2 $+ 2 $+ 3 $^ 2 $* 2"));
-
         // 13 - 12 + 11*10 - 22*5 + 99 + 2^2^2^2 (= 356)
-        assertEquals("356", parser.evaluateSimpleEquation("13 $- 12 $+ 11 $* 10 $- 22 $* 5 $+ 99 $+ 2 $^ 2 $^ 2 $^ 2"));
+        cases.put("32","2 $^ 5 $- 10 $* 2 $+ 2 $+ 3 $^ 2 $* 2");
+        cases.put("356", "13 $- 12 $+ 11 $* 10 $- 22 $* 5 $+ 99 $+ 2 $^ 2 $^ 2 $^ 2");
+
+        for (Map.Entry<String, String> testcase : cases.entrySet())
+            assertEquals(testcase.getKey(), Parser.evaluateSimpleEquation(testcase.getValue()));
     }
 
     @Test
     public void createEquation_NO_PARSING() {
         Parser parser = new Parser("");
+        List<String> cases = new LinkedList<>();
 
-        parser.setFormat("");
+        cases.add("Foo Bar Baz");
+        cases.add("Sample Text...");
+        cases.add("Not a range: [1..a]");
+        cases.add("Not a float range: [1..2|s]");
+        cases.add("31$-31");
+        cases.add("qwe rty uiop");
+        cases.add("Not a range: [1...4]");
+        cases.add("<thisIsUndefinedVariable>");
+
+        for (String testcase : cases) {
+            parser.setFormat(testcase);
+            assertEquals(testcase, parser.createEquation(random));
+        }
     }
 
-    @Test
+    @RepeatedTest(3)
     public void createEquation_INT_RANGE() {
+        Parser parser = new Parser("");
+        Map<String, Set<String>> cases = new HashMap<>();
 
+        cases.put("[1..1]", new HashSet<>());
+        cases.get("[1..1]").add("1");
+
+        cases.put("[1..3]", new HashSet<>());
+        cases.get("[1..3]").add("1");
+        cases.get("[1..3]").add("2");
+        cases.get("[1..3]").add("3");
+
+        cases.put("[-1..0]", new HashSet<>());
+        cases.get("[-1..0]").add("-1");
+        cases.get("[-1..0]").add("0");
+
+        // unusual order, but it also must work
+        cases.put("[-1..-3]", new HashSet<>());
+        cases.get("[-1..-3]").add("-3");
+        cases.get("[-1..-3]").add("-2");
+        cases.get("[-1..-3]").add("-1");
+
+        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
+            parser.setFormat(testcase.getKey());
+            assertTrue(testcase.getValue().contains(parser.createEquation(random)));
+        }
     }
 
-    @Test
+    @RepeatedTest(3)
     public void createEquation_FLOAT_RANGE_STEP() {
+        Parser parser = new Parser("");
+        Map<String, Set<String>> cases = new HashMap<>();
 
+        cases.put("[1..2|0.5]", new HashSet<>());
+        cases.get("[1..2|0.5]").add("1");
+        cases.get("[1..2|0.5]").add("1.5");
+        cases.get("[1..2|0.5]").add("2");
+
+        cases.put("[1..1.3|0.11]", new HashSet<>());
+        cases.get("[1..1.3|0.11]").add("1");
+        cases.get("[1..1.3|0.11]").add("1.11");
+        cases.get("[1..1.3|0.11]").add("1.22");
+
+        cases.put("[1..1.2|0.1]", new HashSet<>());
+        cases.get("[1..1.2|0.1]").add("1");
+        cases.get("[1..1.2|0.1]").add("1.1");
+        cases.get("[1..1.2|0.1]").add("1.2");
+
+        cases.put("[-3..1|1.5]", new HashSet<>());
+        cases.get("[-3..1|1.5]").add("-3");
+        cases.get("[-3..1|1.5]").add("-1.5");
+        cases.get("[-3..1|1.5]").add("0");
+
+        cases.put("[1..1.2|3]", new HashSet<>());
+        cases.get("[1..1.2|3]").add("1");
+
+        cases.put("[1..0|0.3]", new HashSet<>());
+        cases.get("[1..0|0.3]").add("0");
+        cases.get("[1..0|0.3]").add("0.3");
+        cases.get("[1..0|0.3]").add("0.6");
+        cases.get("[1..0|0.3]").add("0.9");
+
+        cases.put("[1..0.1|0.4]", new HashSet<>());
+        cases.get("[1..0.1|0.4]").add("0.1");
+        cases.get("[1..0.1|0.4]").add("0.5");
+        cases.get("[1..0.1|0.4]").add("0.9");
+
+        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
+            parser.setFormat(testcase.getKey());
+            assertTrue(testcase.getValue().contains(parser.createEquation(random)));
+        }
     }
 
-    @Test
+    @RepeatedTest(3)
     public void createEquation_FLOAT_RANGE_DIVISOR() {
+        Parser parser = new Parser("");
+        Map<String, Set<String>> cases = new HashMap<>();
 
+        cases.put("[1..2|:0.5]", new HashSet<>());
+        cases.get("[1..2|:0.5]").add("1");
+        cases.get("[1..2|:0.5]").add("1.5");
+        cases.get("[1..2|:0.5]").add("2");
+
+        cases.put("[1..1.3|:0.11]", new HashSet<>());
+        cases.get("[1..1.3|:0.11]").add("1.1");
+        cases.get("[1..1.3|:0.11]").add("1.21");
+
+        cases.put("[1..1.2|:0.55]", new HashSet<>());
+        cases.get("[1..1.2|:0.55]").add("1.1");
+
+        cases.put("[-3..1|:1.3]", new HashSet<>());
+        cases.get("[-3..1|:1.3]").add("-2.6");
+        cases.get("[-3..1|:1.3]").add("-1.3");
+        cases.get("[-3..1|:1.3]").add("0");
+
+        // no divisors
+        cases.put("[1..1.2|:3]", new HashSet<>());
+        cases.get("[1..1.2|:3]").add("1");
+
+        cases.put("[1..0.1|:0.4]", new HashSet<>());
+        cases.get("[1..0.1|:0.4]").add("0.4");
+        cases.get("[1..0.1|:0.4]").add("0.8");
+
+        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
+            parser.setFormat(testcase.getKey());
+            assertTrue(testcase.getValue().contains(parser.createEquation(random)));
+        }
     }
 
     @Test

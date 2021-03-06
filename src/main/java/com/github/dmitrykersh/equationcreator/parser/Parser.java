@@ -60,12 +60,6 @@ public class Parser {
         this.format = format;
     }
 
-    /*
-    Format:
-        random integer from a to b: [a..b]
-        random item from list: {+|abc|*|:|qwerty|asd}
-     */
-
     public String createEquation(Random random) {
         String equation = format;
 
@@ -150,12 +144,17 @@ public class Parser {
 
                 boolean stepIsDivisor = step_split[1].startsWith(":");
 
-                Double randomInRange;
-
                 double val0 = Double.parseDouble(values[0]);
                 double val1 = Double.parseDouble(values[1]);
 
+                // sort numbers in ascending order to avoid user's mistakes
+                if (val1 < val0){
+                    double tmp = val0;
+                    val0 = val1;
+                    val1 = tmp;
+                }
 
+                Double randomInRange;
                 if (stepIsDivisor) {
                     // delete ':'
                     step_split[1] = step_split[1].substring(1);
@@ -165,12 +164,17 @@ public class Parser {
                     int maxQuotient = Math.round(val1 / divisor) * divisor > val1 ? (int) Math.round(val1 / divisor)
                             : (int) Math.round(val1 / divisor) + 1;
 
-                    int quotient = minQuotient + random.nextInt(maxQuotient - minQuotient);
+                    int quotient = minQuotient + random.nextInt(Math.max(maxQuotient - minQuotient, 1));
 
                     randomInRange = quotient * divisor;
+
+                    // if there's no divisor in range, i.e. [1..4|:5], it'll be parsed to lower bound: 1
+                    if (randomInRange > val1 || randomInRange < val0) randomInRange = val0;
+
                 } else {
                     double step = Double.parseDouble(step_split[1]);
-                    int stepCount = random.nextInt(1 + (int) ((val1 - val0) / step));
+                    int bound = (int) (1 + (val1 - val0) / step);
+                    int stepCount = random.nextInt(bound);
                     randomInRange = val0 + stepCount * step;
                 }
 
@@ -193,8 +197,17 @@ public class Parser {
                 String range = equation.substring(start + 1, end - 1); // cutting [ and ]
                 String[] values = range.split(RANGE_DELIM);
 
-                int randomInt = Integer.parseInt(values[0]) +
-                        random.nextInt(Integer.parseInt(values[1]) - Integer.parseInt(values[0]) + 1);
+                int val0 = Integer.parseInt(values[0]);
+                int val1 = Integer.parseInt(values[1]);
+
+                // sort numbers in ascending order to avoid user's mistakes
+                if (val1 < val0){
+                    int tmp = val0;
+                    val0 = val1;
+                    val1 = tmp;
+                }
+
+                int randomInt = val0 + random.nextInt(val1 - val0 + 1);
 
                 equation = int_range_matcher.replaceFirst(String.valueOf(randomInt));
                 int_range_matcher.reset(equation);
@@ -248,7 +261,7 @@ public class Parser {
         return equation;
     }
 
-    protected String negateValue(final @NotNull String value){
+    static String negateValue(final @NotNull String value){
         switch (value){
             case "+": return "-";
             case "-": return "+";
@@ -258,7 +271,7 @@ public class Parser {
         }
     }
 
-    protected String evaluateSimpleEquation(final @NotNull String str){
+    static String evaluateSimpleEquation(final @NotNull String str){
         String s = new String(str);
         Matcher prior1_matcher = ARITH_PRIOR_1.matcher(s);
 
