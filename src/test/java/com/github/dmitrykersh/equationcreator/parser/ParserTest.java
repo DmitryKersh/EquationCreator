@@ -84,7 +84,6 @@ class ParserTest {
 
     @Test
     public void createEquation_NO_PARSING() {
-        Parser parser = new Parser("");
         List<String> cases = new LinkedList<>();
 
         cases.add("Foo Bar Baz");
@@ -96,6 +95,7 @@ class ParserTest {
         cases.add("Not a range: [1...4]");
         cases.add("<thisIsUndefinedVariable>");
 
+        Parser parser = new Parser("");
         for (String testcase : cases) {
             parser.setFormat(testcase);
             assertEquals(testcase, parser.createEquation(random));
@@ -104,7 +104,6 @@ class ParserTest {
 
     @RepeatedTest(3)
     public void createEquation_INT_RANGE() {
-        Parser parser = new Parser("");
         Map<String, Set<String>> cases = new HashMap<>();
 
         cases.put("[1..1]", new HashSet<>());
@@ -125,6 +124,7 @@ class ParserTest {
         cases.get("[-1..-3]").add("-2");
         cases.get("[-1..-3]").add("-1");
 
+        Parser parser = new Parser("");
         for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
             parser.setFormat(testcase.getKey());
             assertTrue(testcase.getValue().contains(parser.createEquation(random)));
@@ -133,7 +133,6 @@ class ParserTest {
 
     @RepeatedTest(3)
     public void createEquation_FLOAT_RANGE_STEP() {
-        Parser parser = new Parser("");
         Map<String, Set<String>> cases = new HashMap<>();
 
         cases.put("[1..2|0.5]", new HashSet<>());
@@ -170,6 +169,7 @@ class ParserTest {
         cases.get("[1..0.1|0.4]").add("0.5");
         cases.get("[1..0.1|0.4]").add("0.9");
 
+        Parser parser = new Parser("");
         for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
             parser.setFormat(testcase.getKey());
             assertTrue(testcase.getValue().contains(parser.createEquation(random)));
@@ -178,7 +178,6 @@ class ParserTest {
 
     @RepeatedTest(3)
     public void createEquation_FLOAT_RANGE_DIVISOR() {
-        Parser parser = new Parser("");
         Map<String, Set<String>> cases = new HashMap<>();
 
         cases.put("[1..2|:0.5]", new HashSet<>());
@@ -206,20 +205,79 @@ class ParserTest {
         cases.get("[1..0.1|:0.4]").add("0.4");
         cases.get("[1..0.1|:0.4]").add("0.8");
 
+        Parser parser = new Parser("");
         for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
             parser.setFormat(testcase.getKey());
             assertTrue(testcase.getValue().contains(parser.createEquation(random)));
         }
     }
 
-    @Test
+    @RepeatedTest(3)
     public void createEquation_LIST() {
+        Map<String, Set<String>> cases = new HashMap<>();
 
+        cases.put("{abc|q|1q2w|1423}", new HashSet<>());
+        cases.get("{abc|q|1q2w|1423}").add("abc");
+        cases.get("{abc|q|1q2w|1423}").add("q");
+        cases.get("{abc|q|1q2w|1423}").add("1q2w");
+        cases.get("{abc|q|1q2w|1423}").add("1423");
+
+        cases.put("{D|Nat|M}asha {Andr|Serg}eeva", new HashSet<>());
+        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Dasha Andreeva");
+        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Masha Andreeva");
+        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Natasha Andreeva");
+        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Dasha Sergeeva");
+        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Masha Sergeeva");
+        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Natasha Sergeeva");
+
+        Parser parser = new Parser("");
+        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
+            parser.setFormat(testcase.getKey());
+            assertTrue(testcase.getValue().contains(parser.createEquation(random)));
+        }
     }
 
-    @Test
-    public void createEquation_INNER_ELEMENTS() {
+    @RepeatedTest(5)
+    public void createEquation_COMPLEX_SYNTAX() {
+        Map<String, Set<String>> cases = new HashMap<>();
+        //--------------------------------------------------------------------------
+        cases.put("{[1..2]|[7..7.5|0.2]}", new HashSet<>());
 
+        cases.get("{[1..2]|[7..7.5|0.2]}").add("1");
+        cases.get("{[1..2]|[7..7.5|0.2]}").add("2");
+
+        cases.get("{[1..2]|[7..7.5|0.2]}").add("7");
+        cases.get("{[1..2]|[7..7.5|0.2]}").add("7.2");
+        cases.get("{[1..2]|[7..7.5|0.2]}").add("7.4");
+        //--------------------------------------------------------------------------
+        cases.put("[1..2|:{0.3|0.5}]", new HashSet<>());
+
+        cases.get("[1..2|:{0.3|0.5}]").add("1");
+        cases.get("[1..2|:{0.3|0.5}]").add("1.5");
+        cases.get("[1..2|:{0.3|0.5}]").add("2");
+
+        cases.get("[1..2|:{0.3|0.5}]").add("1.2");
+        cases.get("[1..2|:{0.3|0.5}]").add("1.8");
+        //--------------------------------------------------------------------------
+        cases.put("{abc|[1..3]|[5..6]{a|b}F}", new HashSet<>());
+
+        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("abc");
+
+        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("1");
+        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("2");
+        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("3");
+
+        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("5aF");
+        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("6aF");
+        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("5bF");
+        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("6bF");
+        //--------------------------------------------------------------------------
+
+        Parser parser = new Parser("");
+        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
+            parser.setFormat(testcase.getKey());
+            assertTrue(testcase.getValue().contains(parser.createEquation(random)));
+        }
     }
 
     @Test
