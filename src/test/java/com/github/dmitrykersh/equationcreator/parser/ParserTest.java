@@ -2,6 +2,9 @@ package com.github.dmitrykersh.equationcreator.parser;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.*;
 
@@ -11,19 +14,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ParserTest {
     private static Random random = new Random();
 
-    @Test
-    public void negateValue_ALL_IN_ONE() {
-        Map<String, String> cases = new HashMap<>();
-
-        cases.put("+", "-");
-        cases.put("-", "+");
-        cases.put("*", "/");
-        cases.put("/", "*");
-        cases.put("^", "^");
-        cases.put("+-=", "+-=");
-
-        for (Map.Entry<String, String> testcase : cases.entrySet())
-            assertEquals(testcase.getKey(), Parser.negateValue(testcase.getValue()));
+    @ParameterizedTest
+    @CsvSource({
+                       "+, -",
+                       "-, +",
+                       "*, /",
+                       "/, *",
+                       "abc, abc"})
+    public void negateValue_ALL_IN_ONE(String arg, String res) {
+        assertEquals(res, Parser.negateValue(arg));
     }
 
     @Test
@@ -280,9 +279,35 @@ class ParserTest {
         }
     }
 
-    @Test
+    @RepeatedTest(3)
     public void createEquation_VARIABLES() {
+        Map<String, Set<String>> cases = new HashMap<>();
+        //--------------------------------------------------------------------------
+        cases.put("var=<Foo>: <var>", new HashSet<>());
+        cases.get("var=<Foo>: <var>").add("Foo: Foo");
+        //--------------------------------------------------------------------------
+        cases.put("var=<Foo> var2=<Bar> <var><var2><var>", new HashSet<>());
+        cases.get("var=<Foo> var2=<Bar> <var><var2><var>").add("Foo Bar FooBarFoo");
+        //--------------------------------------------------------------------------
+        cases.put("var=<Foo> var2=<Bar> {<var>|<var2>}", new HashSet<>());
+        cases.get("var=<Foo> var2=<Bar> {<var>|<var2>}").add("Foo Bar Foo");
+        cases.get("var=<Foo> var2=<Bar> {<var>|<var2>}").add("Foo Bar Bar");
+        //--------------------------------------------------------------------------
+        cases.put("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>", new HashSet<>());
+        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("1 Foo 1 11");
+        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("1 Foo Foo FooFoo");
+        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("2 Foo 2 22");
+        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("2 Foo Foo FooFoo");
+        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("3 Foo 3 33");
+        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("3 Foo Foo FooFoo");
 
+        Parser parser = new Parser("");
+        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
+            parser.setFormat(testcase.getKey());
+            String s = parser.createEquation(random);
+            // System.out.println(s);
+            assertTrue(testcase.getValue().contains(s));
+        }
     }
 
     @Test
