@@ -110,7 +110,7 @@ class ParserTest {
                 arguments("[1..1.3|:0.11]", Arrays.asList("1.1", "1.21")),
                 arguments("[1..1.2|:0.1]", Arrays.asList("1", "1.1", "1.2")),
                 arguments("[25..1|:7]", Arrays.asList("7", "14", "21")),
-                arguments("[1..1.2|:3]", Collections.emptyList()),
+                arguments("[1..1.2|:3]", Arrays.asList("1")),
                 arguments("[1..0.1|:0.4]", Arrays.asList("0", "0.4", "0.8"))
         );
     }
@@ -140,6 +140,15 @@ class ParserTest {
                 arguments("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>",
                         Arrays.asList("1 Foo 1 11", "1 Foo Foo FooFoo", "2 Foo 2 22", "2 Foo Foo FooFoo", "3 Foo 3 33",
                                 "3 Foo Foo FooFoo"))
+        );
+    }
+
+    private static Stream<Arguments> argumentsStreamForInnerVariables() {
+        return Stream.of(
+                arguments("var=<inner1=<{A|B|C}>,inner2=<[1..2]>> : <var>", Arrays.asList(
+                        "A,1 : A,1", "B,1 : B,1", "C,1 : C,1",
+                        "A,2 : A,2", "B,2 : B,2", "C,2 : C,2")),
+                arguments("foo=<FOO bar=<BAR baz=<BAZ>>>: <foo>, <bar>, <baz>", Arrays.asList("FOO BAR BAZ: FOO BAR BAZ, BAR BAZ, BAZ"))
         );
     }
 
@@ -182,16 +191,15 @@ class ParserTest {
     @MethodSource("argumentsStreamForVariables")
     public void createEquation_VARIABLES(final String format, final List<String> allowedValues) {
         parser.setFormat(format);
-        assertTrue(allowedValues.contains(parser.createEquation(random)));
+        String s = parser.createEquation(random);
+        assertTrue(allowedValues.contains(s));
     }
 
-    @Test
-    public void createEquation_INNER_VARIABLES() {
-
-    }
-
-    @Test
-    public void createEquation_EVERYTHING() {
-
+    @ParameterizedTest
+    @MethodSource("argumentsStreamForInnerVariables")
+    public void createEquation_INNER_VARIABLES(final String format, final List<String> allowedValues) {
+        parser.setFormat(format);
+        String s = parser.createEquation(random);
+        assertTrue(allowedValues.contains(s));
     }
 }
