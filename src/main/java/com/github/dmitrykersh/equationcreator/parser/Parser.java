@@ -33,8 +33,8 @@ public class Parser {
     // VARIABLES
     // define: a=<[1..10]> -- a is random number in 1-9
     // use: <a> -- this will be replaced with value of a
-    private static final Pattern VAR_DEFINITION_PATTERN = Pattern.compile("[a-zA-Z_0-9]+=<[^<>]+>");
-    private static final Pattern VAR_USAGE_PATTERN = Pattern.compile("<!?[a-zA-Z_0-9]+>");
+    private static final Pattern VAR_DEFINITION_PATTERN = Pattern.compile("[a-zA-Z]+[_0-9]?=<[^<>]+>");
+    private static final Pattern VAR_USAGE_PATTERN = Pattern.compile("<!?[a-zA-Z]+[_0-9]?>");
 
     // arithmetics
     // to use arithmetic signs for their purpose, use $
