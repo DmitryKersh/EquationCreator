@@ -3,13 +3,17 @@ package com.github.dmitrykersh.equationcreator.parser;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class ParserTest {
     private static final Random random = new Random();
@@ -78,213 +82,107 @@ class ParserTest {
         assertEquals(arg, parser.createEquation(random));
     }
 
-    @RepeatedTest(3)
-    public void createEquation_INT_RANGE() {
-        Map<String, Set<String>> cases = new HashMap<>();
-
-        cases.put("[1..1]", new HashSet<>());
-        cases.get("[1..1]").add("1");
-
-        cases.put("[1..3]", new HashSet<>());
-        cases.get("[1..3]").add("1");
-        cases.get("[1..3]").add("2");
-        cases.get("[1..3]").add("3");
-
-        cases.put("[-1..0]", new HashSet<>());
-        cases.get("[-1..0]").add("-1");
-        cases.get("[-1..0]").add("0");
-
-        // unusual order, but it also must work
-        cases.put("[-1..-3]", new HashSet<>());
-        cases.get("[-1..-3]").add("-3");
-        cases.get("[-1..-3]").add("-2");
-        cases.get("[-1..-3]").add("-1");
-
-        Parser parser = new Parser("");
-        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
-            parser.setFormat(testcase.getKey());
-            assertTrue(testcase.getValue().contains(parser.createEquation(random)));
-        }
+    private static Stream<Arguments> argumentsStreamForIntRange() {
+        return Stream.of(
+                arguments("[1..1]", Arrays.asList("1")),
+                arguments("[1..3]", Arrays.asList("1", "2", "3")),
+                arguments("[-1..0]", Arrays.asList("-1", "0")),
+                arguments("[-1..-3]", Arrays.asList("-1", "-2", "-3")),
+                arguments("qwe[1..-1]", Arrays.asList("qwe-1", "qwe0", "qwe1")),
+                arguments("a[-1..-3]a", Arrays.asList("a-1a", "a-2a", "a-3a"))
+        );
     }
 
-    @RepeatedTest(3)
-    public void createEquation_FLOAT_RANGE_STEP() {
-        Map<String, Set<String>> cases = new HashMap<>();
-
-        cases.put("[1..2|0.5]", new HashSet<>());
-        cases.get("[1..2|0.5]").add("1");
-        cases.get("[1..2|0.5]").add("1.5");
-        cases.get("[1..2|0.5]").add("2");
-
-        cases.put("[1..1.3|0.11]", new HashSet<>());
-        cases.get("[1..1.3|0.11]").add("1");
-        cases.get("[1..1.3|0.11]").add("1.11");
-        cases.get("[1..1.3|0.11]").add("1.22");
-
-        cases.put("[1..1.2|0.1]", new HashSet<>());
-        cases.get("[1..1.2|0.1]").add("1");
-        cases.get("[1..1.2|0.1]").add("1.1");
-        cases.get("[1..1.2|0.1]").add("1.2");
-
-        cases.put("[-3..1|1.5]", new HashSet<>());
-        cases.get("[-3..1|1.5]").add("-3");
-        cases.get("[-3..1|1.5]").add("-1.5");
-        cases.get("[-3..1|1.5]").add("0");
-
-        cases.put("[1..1.2|3]", new HashSet<>());
-        cases.get("[1..1.2|3]").add("1");
-
-        cases.put("[1..0|0.3]", new HashSet<>());
-        cases.get("[1..0|0.3]").add("0");
-        cases.get("[1..0|0.3]").add("0.3");
-        cases.get("[1..0|0.3]").add("0.6");
-        cases.get("[1..0|0.3]").add("0.9");
-
-        cases.put("[1..0.1|0.4]", new HashSet<>());
-        cases.get("[1..0.1|0.4]").add("0.1");
-        cases.get("[1..0.1|0.4]").add("0.5");
-        cases.get("[1..0.1|0.4]").add("0.9");
-
-        Parser parser = new Parser("");
-        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
-            parser.setFormat(testcase.getKey());
-            assertTrue(testcase.getValue().contains(parser.createEquation(random)));
-        }
+    private static Stream<Arguments> argumentsStreamForFloatRangeStep() {
+        return Stream.of(
+                arguments("[1..2|0.5]", Arrays.asList("1", "1.5", "2")),
+                arguments("[1..1.3|0.11]", Arrays.asList("1", "1.11", "1.22")),
+                arguments("[1..1.2|0.1]", Arrays.asList("1", "1.1", "1.2")),
+                arguments("[1..0|0.3]", Arrays.asList("0", "0.3", "0.6", "0.9")),
+                arguments("[1..1.2|3]", Arrays.asList("1")),
+                arguments("[1..0.1|0.4]", Arrays.asList("0.1", "0.5", "0.9"))
+        );
     }
 
-    @RepeatedTest(3)
-    public void createEquation_FLOAT_RANGE_DIVISOR() {
-        Map<String, Set<String>> cases = new HashMap<>();
-
-        cases.put("[1..2|:0.5]", new HashSet<>());
-        cases.get("[1..2|:0.5]").add("1");
-        cases.get("[1..2|:0.5]").add("1.5");
-        cases.get("[1..2|:0.5]").add("2");
-
-        cases.put("[1..1.3|:0.11]", new HashSet<>());
-        cases.get("[1..1.3|:0.11]").add("1.1");
-        cases.get("[1..1.3|:0.11]").add("1.21");
-
-        cases.put("[1..1.2|:0.55]", new HashSet<>());
-        cases.get("[1..1.2|:0.55]").add("1.1");
-
-        cases.put("[-3..1|:1.3]", new HashSet<>());
-        cases.get("[-3..1|:1.3]").add("-2.6");
-        cases.get("[-3..1|:1.3]").add("-1.3");
-        cases.get("[-3..1|:1.3]").add("0");
-
-        // no divisors
-        cases.put("[1..1.2|:3]", new HashSet<>());
-        cases.get("[1..1.2|:3]").add("1");
-
-        cases.put("[1..0.1|:0.4]", new HashSet<>());
-        cases.get("[1..0.1|:0.4]").add("0.4");
-        cases.get("[1..0.1|:0.4]").add("0.8");
-
-        Parser parser = new Parser("");
-        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
-            parser.setFormat(testcase.getKey());
-            assertTrue(testcase.getValue().contains(parser.createEquation(random)));
-        }
+    private static Stream<Arguments> argumentsStreamForFloatRangeDivisor() {
+        return Stream.of(
+                arguments("[1..2|:0.5]", Arrays.asList("1", "1.5", "2")),
+                arguments("[1..1.3|:0.11]", Arrays.asList("1.1", "1.21")),
+                arguments("[1..1.2|:0.1]", Arrays.asList("1", "1.1", "1.2")),
+                arguments("[25..1|:7]", Arrays.asList("7", "14", "21")),
+                arguments("[1..1.2|:3]", Collections.emptyList()),
+                arguments("[1..0.1|:0.4]", Arrays.asList("0", "0.4", "0.8"))
+        );
     }
 
-    @RepeatedTest(3)
-    public void createEquation_LIST() {
-        Map<String, Set<String>> cases = new HashMap<>();
-
-        cases.put("{abc|q|1q2w|1423}", new HashSet<>());
-        cases.get("{abc|q|1q2w|1423}").add("abc");
-        cases.get("{abc|q|1q2w|1423}").add("q");
-        cases.get("{abc|q|1q2w|1423}").add("1q2w");
-        cases.get("{abc|q|1q2w|1423}").add("1423");
-
-        cases.put("{D|Nat|M}asha {Andr|Serg}eeva", new HashSet<>());
-        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Dasha Andreeva");
-        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Masha Andreeva");
-        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Natasha Andreeva");
-        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Dasha Sergeeva");
-        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Masha Sergeeva");
-        cases.get("{D|Nat|M}asha {Andr|Serg}eeva").add("Natasha Sergeeva");
-
-        Parser parser = new Parser("");
-        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
-            parser.setFormat(testcase.getKey());
-            assertTrue(testcase.getValue().contains(parser.createEquation(random)));
-        }
+    private static Stream<Arguments> argumentsStreamForList() {
+        return Stream.of(
+                arguments("{abc|q|1q2w|1423}", Arrays.asList("abc", "q", "1q2w", "1423")),
+                arguments("{D|Nat|M}asha {Andr|Serg}eeva",
+                        Arrays.asList("Dasha Andreeva", "Masha Andreeva", "Natasha Andreeva", "Dasha Sergeeva",
+                                "Masha Sergeeva", "Natasha Sergeeva"))
+        );
     }
 
-    @RepeatedTest(5)
-    public void createEquation_COMPLEX_SYNTAX() {
-        Map<String, Set<String>> cases = new HashMap<>();
-        //--------------------------------------------------------------------------
-        cases.put("{[1..2]|[7..7.5|0.2]}", new HashSet<>());
-
-        cases.get("{[1..2]|[7..7.5|0.2]}").add("1");
-        cases.get("{[1..2]|[7..7.5|0.2]}").add("2");
-
-        cases.get("{[1..2]|[7..7.5|0.2]}").add("7");
-        cases.get("{[1..2]|[7..7.5|0.2]}").add("7.2");
-        cases.get("{[1..2]|[7..7.5|0.2]}").add("7.4");
-        //--------------------------------------------------------------------------
-        cases.put("[1..2|:{0.3|0.5}]", new HashSet<>());
-
-        cases.get("[1..2|:{0.3|0.5}]").add("1");
-        cases.get("[1..2|:{0.3|0.5}]").add("1.5");
-        cases.get("[1..2|:{0.3|0.5}]").add("2");
-
-        cases.get("[1..2|:{0.3|0.5}]").add("1.2");
-        cases.get("[1..2|:{0.3|0.5}]").add("1.8");
-        //--------------------------------------------------------------------------
-        cases.put("{abc|[1..3]|[5..6]{a|b}F}", new HashSet<>());
-
-        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("abc");
-
-        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("1");
-        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("2");
-        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("3");
-
-        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("5aF");
-        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("6aF");
-        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("5bF");
-        cases.get("{abc|[1..3]|[5..6]{a|b}F}").add("6bF");
-        //--------------------------------------------------------------------------
-
-        Parser parser = new Parser("");
-        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
-            parser.setFormat(testcase.getKey());
-            assertTrue(testcase.getValue().contains(parser.createEquation(random)));
-        }
+    private static Stream<Arguments> argumentsStreamForComplexSyntax() {
+        return Stream.of(
+                arguments("{[1..2]|[7..7.5|0.2]}", Arrays.asList("1", "2", "7", "7.2", "7.4")),
+                arguments("[1..2|:{0.3|0.5}]", Arrays.asList("1", "1.5", "2", "1.2", "1.8")),
+                arguments("{abc|[1..3]|[5..6]{a|b}F}", Arrays.asList("abc", "1", "2", "3", "5aF", "6aF", "5bF", "6bF"))
+        );
     }
 
-    @RepeatedTest(3)
-    public void createEquation_VARIABLES() {
-        Map<String, Set<String>> cases = new HashMap<>();
-        //--------------------------------------------------------------------------
-        cases.put("var=<Foo>: <var>", new HashSet<>());
-        cases.get("var=<Foo>: <var>").add("Foo: Foo");
-        //--------------------------------------------------------------------------
-        cases.put("var=<Foo> var2=<Bar> <var><var2><var>", new HashSet<>());
-        cases.get("var=<Foo> var2=<Bar> <var><var2><var>").add("Foo Bar FooBarFoo");
-        //--------------------------------------------------------------------------
-        cases.put("var=<Foo> var2=<Bar> {<var>|<var2>}", new HashSet<>());
-        cases.get("var=<Foo> var2=<Bar> {<var>|<var2>}").add("Foo Bar Foo");
-        cases.get("var=<Foo> var2=<Bar> {<var>|<var2>}").add("Foo Bar Bar");
-        //--------------------------------------------------------------------------
-        cases.put("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>", new HashSet<>());
-        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("1 Foo 1 11");
-        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("1 Foo Foo FooFoo");
-        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("2 Foo 2 22");
-        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("2 Foo Foo FooFoo");
-        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("3 Foo 3 33");
-        cases.get("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>").add("3 Foo Foo FooFoo");
+    private static Stream<Arguments> argumentsStreamForVariables() {
+        return Stream.of(
+                arguments("var=<Foo>: <var>", Arrays.asList("Foo: Foo")),
+                arguments("var=<Foo> var2=<Bar> <var><var2><var>", Arrays.asList("Foo Bar FooBarFoo")),
+                arguments("var=<Foo> var2=<Bar> {<var>|<var2>}", Arrays.asList("Foo Bar Foo", "Foo Bar Bar")),
+                arguments("var=<[1..3]> var2=<Foo> var3=<{<var>|<var2>}> <var3><var3>",
+                        Arrays.asList("1 Foo 1 11", "1 Foo Foo FooFoo", "2 Foo 2 22", "2 Foo Foo FooFoo", "3 Foo 3 33",
+                                "3 Foo Foo FooFoo"))
+        );
+    }
 
-        Parser parser = new Parser("");
-        for (Map.Entry<String, Set<String>> testcase : cases.entrySet()) {
-            parser.setFormat(testcase.getKey());
-            String s = parser.createEquation(random);
-            // System.out.println(s);
-            assertTrue(testcase.getValue().contains(s));
-        }
+    @ParameterizedTest
+    @MethodSource("argumentsStreamForIntRange")
+    public void createEquation_INT_RANGE(final String format, final List<String> allowedValues) {
+        parser.setFormat(format);
+        assertTrue(allowedValues.contains(parser.createEquation(random)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentsStreamForFloatRangeStep")
+    public void createEquation_FLOAT_RANGE_STEP(final String format, final List<String> allowedValues) {
+        parser.setFormat(format);
+        assertTrue(allowedValues.contains(parser.createEquation(random)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentsStreamForFloatRangeDivisor")
+    public void createEquation_FLOAT_RANGE_DIVISOR(final String format, final List<String> allowedValues) {
+        parser.setFormat(format);
+        assertTrue(allowedValues.contains(parser.createEquation(random)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentsStreamForList")
+    public void createEquation_LIST(final String format, final List<String> allowedValues) {
+        parser.setFormat(format);
+        assertTrue(allowedValues.contains(parser.createEquation(random)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentsStreamForComplexSyntax")
+    public void createEquation_COMPLEX_SYNTAX(final String format, final List<String> allowedValues) {
+        parser.setFormat(format);
+        assertTrue(allowedValues.contains(parser.createEquation(random)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("argumentsStreamForVariables")
+    public void createEquation_VARIABLES(final String format, final List<String> allowedValues) {
+        parser.setFormat(format);
+        assertTrue(allowedValues.contains(parser.createEquation(random)));
     }
 
     @Test
