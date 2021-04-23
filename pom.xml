@@ -10,7 +10,7 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>equation-creator-api</module>
-        <module>equation-creator-gui</module>
+        <module>equation-creator-GUI</module>
     </modules>
 
     <properties>
