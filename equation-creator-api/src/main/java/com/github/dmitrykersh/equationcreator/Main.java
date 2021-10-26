@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.Scanner;
 
+
 public class Main {
    private static final String FORMAT_HINT = "Enter format string.\n"
            + "Formatting:"
@@ -16,7 +17,7 @@ public class Main {
            + "\n\tIf your variable <sign> is [+ - * /] and you need opposite sign: <!sign>"
            + "\n\t--------------------------------------------------------"
            + "\n\tTo perform in-line math operations as [+ - * / ^] "
-           + "\n\tuse $ prefix and no spaces between anything: 10$+11 -> 21"
+           + "\n\tuse $ prefix and with spaces: 10 $+ 11 -> 21"
            + "\n\t--------------------------------------------------------"
            + "\n\tRandom integer between X and Y: [X..Y]"
            + "\n\tRandom float between X and Y dividable by D: [X..Y|:D]"
@@ -40,7 +41,7 @@ public class Main {
        try (FileOutputStream fileOut = new FileOutputStream("output.txt")){
            fileOut.write(("FORMAT:\n" + format + "\n\nTASKS:\n").getBytes(StandardCharsets.UTF_8));
            for (int i = 1; i <= numberOfTasks; i++){
-               fileOut.write((i + ". " + p.createEquation(r) + "\n").getBytes(StandardCharsets.UTF_8));
+               fileOut.write((i + ". " + p.createEquationWithEscaping(r) + "\n").getBytes(StandardCharsets.UTF_8));
            }
        } catch (IOException exception){
            System.out.println(exception.getMessage());

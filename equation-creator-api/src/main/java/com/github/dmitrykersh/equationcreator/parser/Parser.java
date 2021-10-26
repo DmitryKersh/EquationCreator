@@ -1,5 +1,6 @@
 package com.github.dmitrykersh.equationcreator.parser;
 
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
@@ -8,9 +9,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 
+import static com.github.dmitrykersh.equationcreator.parser.ParserConstants.ParserRegexPatterns.*;
+import static com.github.dmitrykersh.equationcreator.parser.ParserConstants.ParserRegexStrings.*;
+
 public class Parser {
     private String format;
-
 
     public Parser(final @NotNull String format) {
         this.format = format;
@@ -20,7 +23,7 @@ public class Parser {
         this.format = format;
     }
 
-    public String createEquation(Random random) {
+    public String createEquationWithoutEscaping(Random random) {
         String equation = format;
 
         // parse variable definition
@@ -47,7 +50,7 @@ public class Parser {
                 words[1] = words[1].substring(1, words[1].length() - 1);
 
                 Parser valueParser = new Parser(words[1]);
-                String value = valueParser.createEquation(random);
+                String value = valueParser.createEquationWithoutEscaping(random);
 
                 variables.put(words[0], value);
 
@@ -99,8 +102,8 @@ public class Parser {
                 int end = floatRangeMatcher.end();
 
                 String range = equation.substring(start + 1, end - 1); // cutting [ and ]
-                String[] stepSplit = range.split(ParserConstants.ParserRegexStrings.FLOAT_RANGE_STEP_DELIM);
-                String[] values = stepSplit[0].split(ParserConstants.ParserRegexStrings.RANGE_DELIM);
+                String[] stepSplit = range.split(FLOAT_RANGE_STEP_DELIM);
+                String[] values = stepSplit[0].split(RANGE_DELIM);
 
                 boolean stepIsDivisor = stepSplit[1].startsWith(":");
 
@@ -138,7 +141,7 @@ public class Parser {
                     randomInRange = val0 + stepCount * step;
                 }
 
-                String decimalFormatPattern = String.valueOf(stepSplit[1]).replaceAll(ParserConstants.ParserRegexStrings.DIGIT, "#");
+                String decimalFormatPattern = String.valueOf(stepSplit[1]).replaceAll(DIGIT, "#");
 
                 DecimalFormat decimalFormat = new DecimalFormat(decimalFormatPattern);
 
@@ -155,7 +158,7 @@ public class Parser {
                 int end = intRangeMatcher.end();
 
                 String range = equation.substring(start + 1, end - 1); // cutting [ and ]
-                String[] values = range.split(ParserConstants.ParserRegexStrings.RANGE_DELIM);
+                String[] values = range.split(RANGE_DELIM);
 
                 int val0 = Integer.parseInt(values[0]);
                 int val1 = Integer.parseInt(values[1]);
@@ -221,6 +224,17 @@ public class Parser {
         return equation;
     }
 
+    public String createEquationWithEscaping(Random random) {
+        String equation = createEquationWithoutEscaping(random);
+
+        for (val entry : ESCAPE_WORDS.entrySet()) {
+            Matcher matcher = entry.getKey().matcher(equation);
+            equation = matcher.replaceAll(entry.getValue());
+        }
+
+        return equation;
+    }
+
     static String negateValue(final @NotNull String value){
         switch (value){
             case "+": return "-";
@@ -233,35 +247,35 @@ public class Parser {
 
     static String evaluateSimpleEquation(final @NotNull String str){
         String s = new String(str);
-        Matcher prior1Matcher = ParserConstants.ParserRegexPatterns.ARITH_PRIOR_1.matcher(s);
+        Matcher prior1Matcher = ARITH_PRIOR_1.matcher(s);
 
         while (prior1Matcher.find()){
             int start = prior1Matcher.start();
             int end = prior1Matcher.end();
 
             String operation = s.substring(start, end);
-            String[] values = operation.split(ParserConstants.ParserRegexStrings.ARITH_SIGN_PREFIX);
+            String[] values = operation.split(ARITH_SIGN_PREFIX);
 
             double op1 = Double.parseDouble(values[0]);
             double op2 = Double.parseDouble(values[1].substring(1));
 
             Double res = Math.pow(op1, op2);
 
-            String decimalFormatPattern = String.valueOf(res).replaceAll(ParserConstants.ParserRegexStrings.DIGIT, "#");
+            String decimalFormatPattern = String.valueOf(res).replaceAll(DIGIT, "#");
             DecimalFormat decimalFormat = new DecimalFormat(decimalFormatPattern);
 
             s = prior1Matcher.replaceFirst(decimalFormat.format(res));
             prior1Matcher.reset(s);
         }
 
-        Matcher prior2Matcher = ParserConstants.ParserRegexPatterns.ARITH_PRIOR_2.matcher(s);
+        Matcher prior2Matcher = ARITH_PRIOR_2.matcher(s);
 
         while (prior2Matcher.find()){
             int start = prior2Matcher.start();
             int end = prior2Matcher.end();
 
             String operation = s.substring(start, end);
-            String[] values = operation.split(ParserConstants.ParserRegexStrings.ARITH_SIGN_PREFIX);
+            String[] values = operation.split(ARITH_SIGN_PREFIX);
 
 
             char operator = values[1].charAt(0);
@@ -281,21 +295,21 @@ public class Parser {
                     break;
                 }
             }
-            String decimalFormatPattern = String.valueOf(res).replaceAll(ParserConstants.ParserRegexStrings.DIGIT, "#");
+            String decimalFormatPattern = String.valueOf(res).replaceAll(DIGIT, "#");
             DecimalFormat decimalFormat = new DecimalFormat(decimalFormatPattern);
 
             s = prior2Matcher.replaceFirst(decimalFormat.format(res));
             prior2Matcher.reset(s);
         }
 
-        Matcher prior3Matcher = ParserConstants.ParserRegexPatterns.ARITH_PRIOR_3.matcher(s);
+        Matcher prior3Matcher = ARITH_PRIOR_3.matcher(s);
 
         while (prior3Matcher.find()){
             int start = prior3Matcher.start();
             int end = prior3Matcher.end();
 
             String operation = s.substring(start, end);
-            String[] values = operation.split(ParserConstants.ParserRegexStrings.ARITH_SIGN_PREFIX);
+            String[] values = operation.split(ARITH_SIGN_PREFIX);
 
 
             char operator = values[1].charAt(0);
@@ -315,7 +329,7 @@ public class Parser {
                     break;
                 }
             }
-            String decimalFormatPattern = String.valueOf(res).replaceAll(ParserConstants.ParserRegexStrings.DIGIT, "#");
+            String decimalFormatPattern = String.valueOf(res).replaceAll(DIGIT, "#");
             DecimalFormat decimalFormat = new DecimalFormat(decimalFormatPattern);
 
             s = prior3Matcher.replaceFirst(decimalFormat.format(res));
