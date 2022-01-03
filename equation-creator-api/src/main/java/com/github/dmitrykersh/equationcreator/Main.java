@@ -42,7 +42,7 @@ public class Main {
            fileOut.write(("FORMAT:\n" + format + "\n\nTASKS:\n").getBytes(StandardCharsets.UTF_8));
            for (int i = 1; i <= numberOfTasks; i++){
                fileOut.write((i + ". " + p.parseWithEscaping(r, format) + "\n").getBytes(StandardCharsets.UTF_8));
-               System.out.println(i + ". " + p.parseWithEscaping(r, format) + "\n");
+               // System.out.println(i + ". " + p.parseWithEscaping(r, format) + "\n");
            }
        } catch (IOException exception){
            System.out.println(exception.getMessage());
