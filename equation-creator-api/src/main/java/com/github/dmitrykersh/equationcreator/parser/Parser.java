@@ -23,13 +23,13 @@ public class Parser {
         this.format = format;
     }
 
-    public String createEquationWithoutEscaping(Random random) {
-        String equation = format;
+    public static String parse(Random random, String template) {
+        String equation = template;
 
         // parse variable definition
         Map<String, String> variables = new HashMap<>();
-        Matcher varUseMatcher = ParserConstants.ParserRegexPatterns.VAR_USAGE_PATTERN.matcher(equation);
-        Matcher varDefMatcher = ParserConstants.ParserRegexPatterns.VAR_DEFINITION_PATTERN.matcher(equation);
+        Matcher varUseMatcher = VAR_USAGE_PATTERN.matcher(equation);
+        Matcher varDefMatcher = VAR_DEFINITION_PATTERN.matcher(equation);
 
         boolean anyVariableFound = true;
 
@@ -49,9 +49,8 @@ public class Parser {
                 // cutting braces <>
                 words[1] = words[1].substring(1, words[1].length() - 1);
 
-                Parser valueParser = new Parser(words[1]);
-                String value = valueParser.createEquationWithoutEscaping(random);
 
+                String value = parse(random, words[1]);
                 variables.put(words[0], value);
 
                 equation = varDefMatcher.replaceFirst(value);
@@ -67,16 +66,16 @@ public class Parser {
 
                 boolean isNegative = false;
 
-                String var_name = equation.substring(start + 1, end - 1);
+                String varName = equation.substring(start + 1, end - 1);
 
-                if (var_name.startsWith("!")) {
-                    var_name = var_name.substring(1);
+                if (varName.startsWith("!")) {
+                    varName = varName.substring(1);
                     isNegative = true;
                 }
 
-                if (variables.containsKey(var_name)) {
-                    String var_value = variables.get(var_name);
-                    equation = varUseMatcher.replaceFirst(isNegative ? negateValue(var_value) : var_value);
+                if (variables.containsKey(varName)) {
+                    String varValue = variables.get(varName);
+                    equation = varUseMatcher.replaceFirst(isNegative ? negateValue(varValue) : varValue);
                     anyVariableFound = true;
                 } else break;
 
@@ -84,11 +83,11 @@ public class Parser {
             }
         }
 
-        Matcher floatRangeMatcher = ParserConstants.ParserRegexPatterns.FLOAT_RANGE_PATTERN.matcher(equation);
-        Matcher intRangeMatcher = ParserConstants.ParserRegexPatterns.INT_RANGE_PATTERN.matcher(equation);
-        Matcher listMatcher = ParserConstants.ParserRegexPatterns.LIST_PATTERN.matcher(equation);
-        Matcher arithBracketsMatcher = ParserConstants.ParserRegexPatterns.ARITH_BRACKETS_PATTERN.matcher(equation);
-        Matcher arithNoBracketsMatcher = ParserConstants.ParserRegexPatterns.ARITH_NO_BRACKETS_PATTERN.matcher(equation);
+        Matcher floatRangeMatcher = FLOAT_RANGE_PATTERN.matcher(equation);
+        Matcher intRangeMatcher = INT_RANGE_PATTERN.matcher(equation);
+        Matcher listMatcher = LIST_PATTERN.matcher(equation);
+        Matcher arithBracketsMatcher = ARITH_BRACKETS_PATTERN.matcher(equation);
+        Matcher arithNoBracketsMatcher = ARITH_NO_BRACKETS_PATTERN.matcher(equation);
 
         boolean anyPatternFound = true;
 
@@ -105,7 +104,7 @@ public class Parser {
                 String[] stepSplit = range.split(FLOAT_RANGE_STEP_DELIM);
                 String[] values = stepSplit[0].split(RANGE_DELIM);
 
-                boolean stepIsDivisor = stepSplit[1].startsWith(":");
+                boolean divisorMode = stepSplit[1].startsWith(":");
 
                 double val0 = Double.parseDouble(values[0]);
                 double val1 = Double.parseDouble(values[1]);
@@ -118,7 +117,7 @@ public class Parser {
                 }
 
                 Double randomInRange;
-                if (stepIsDivisor) {
+                if (divisorMode) {
                     // delete ':'
                     stepSplit[1] = stepSplit[1].substring(1);
                     double divisor = Double.parseDouble(stepSplit[1]);
@@ -212,7 +211,7 @@ public class Parser {
                 int end = listMatcher.end();
 
                 String list = equation.substring(start + 1, end - 1); // cutting { and }
-                String[] values = list.split(ParserConstants.ParserRegexPatterns.LIST_DELIM);
+                String[] values = list.split(LIST_DELIM);
                 int randomIndex = random.nextInt(values.length);
 
                 equation = listMatcher.replaceFirst(values[randomIndex]);
@@ -224,10 +223,17 @@ public class Parser {
         return equation;
     }
 
-    public String createEquationWithEscaping(Random random) {
-        String equation = createEquationWithoutEscaping(random);
+    public static String parseWithEscaping(Random random, String template) {
+        String equation = template;
 
-        for (val entry : ESCAPE_WORDS.entrySet()) {
+        for (val entry : ESCAPE_SYMBOLS_ENCODE.entrySet()) {
+            Matcher matcher = entry.getKey().matcher(equation);
+            equation = matcher.replaceAll(entry.getValue());
+        }
+
+        equation = parse(random, equation);
+
+        for (val entry : ESCAPE_SYMBOLS_DECODE.entrySet()) {
             Matcher matcher = entry.getKey().matcher(equation);
             equation = matcher.replaceAll(entry.getValue());
         }

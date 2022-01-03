@@ -2,7 +2,6 @@ package com.github.dmitrykersh.equationcreator.parser;
 
 import lombok.experimental.UtilityClass;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -49,7 +48,20 @@ public class ParserConstants {
         public static final Pattern ARITH_PRIOR_2 = Pattern.compile(DECIMAL + "\\s\\$[*/]\\s" + DECIMAL);
         public static final Pattern ARITH_PRIOR_3 = Pattern.compile(DECIMAL + "\\s\\$[+-]\\s" + DECIMAL);
 
-        public static final Map<Pattern, String> ESCAPE_WORDS = Map.of(
+        public static final Map<Pattern, String> ESCAPE_SYMBOLS_ENCODE = Map.of(
+                Pattern.compile("\\\\\\{"), "\\\\OCB",
+                Pattern.compile("\\\\}"), "\\\\CCB",
+                Pattern.compile("\\\\\\["), "\\\\OSB",
+                Pattern.compile("\\\\]"), "\\\\CSB",
+                Pattern.compile("\\\\\\("), "\\\\ORB",
+                Pattern.compile("\\\\\\)"), "\\\\CRB",
+                Pattern.compile("\\\\<"), "\\\\OTB",
+                Pattern.compile("\\\\>"), "\\\\CTB",
+                Pattern.compile("\\\\\\\\"), "\\\\BSH",
+                Pattern.compile("\\\\\\|"), "\\\\PIP"
+        );
+
+        public static final Map<Pattern, String> ESCAPE_SYMBOLS_DECODE = Map.of(
                 Pattern.compile("\\\\OCB"), "{",
                 Pattern.compile("\\\\CCB"), "}",
                 Pattern.compile("\\\\OSB"), "[",
@@ -58,8 +70,8 @@ public class ParserConstants {
                 Pattern.compile("\\\\CRB"), ")",
                 Pattern.compile("\\\\OTB"), "<",
                 Pattern.compile("\\\\CTB"), ">",
-                Pattern.compile("\\\\B"), "\\",
-                Pattern.compile("\\\\P"), "|"
+                Pattern.compile("\\\\BSH"), "\\\\",
+                Pattern.compile("\\\\PIP"), "|"
         );
     }
 

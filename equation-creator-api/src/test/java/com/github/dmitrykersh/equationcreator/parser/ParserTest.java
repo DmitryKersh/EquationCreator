@@ -76,8 +76,7 @@ class ParserTest {
             "31$-31", "qwe rty uiop", "Not a range: [1...4]", "<thisIsUndefinedVariable>",
     })
     public void createEquation_NO_PARSING(String arg) {
-        parser.setFormat(arg);
-        assertEquals(arg, parser.createEquationWithoutEscaping(random));
+        assertEquals(arg, Parser.parseWithEscaping(random, arg));
     }
 
     private static Stream<Arguments> argumentsStreamForIntRange() {
@@ -153,51 +152,42 @@ class ParserTest {
     @ParameterizedTest
     @MethodSource("argumentsStreamForIntRange")
     public void createEquation_INT_RANGE(final String format, final List<String> allowedValues) {
-        parser.setFormat(format);
-        assertTrue(allowedValues.contains(parser.createEquationWithoutEscaping(random)));
+        assertTrue(allowedValues.contains(Parser.parseWithEscaping(random, format)));
     }
 
     @ParameterizedTest
     @MethodSource("argumentsStreamForFloatRangeStep")
     public void createEquation_FLOAT_RANGE_STEP(final String format, final List<String> allowedValues) {
-        parser.setFormat(format);
-        assertTrue(allowedValues.contains(parser.createEquationWithoutEscaping(random)));
+        assertTrue(allowedValues.contains(Parser.parseWithEscaping(random, format)));
     }
 
     @ParameterizedTest
     @MethodSource("argumentsStreamForFloatRangeDivisor")
     public void createEquation_FLOAT_RANGE_DIVISOR(final String format, final List<String> allowedValues) {
-        parser.setFormat(format);
-        assertTrue(allowedValues.contains(parser.createEquationWithoutEscaping(random)));
+        assertTrue(allowedValues.contains(Parser.parseWithEscaping(random, format)));
     }
 
     @ParameterizedTest
     @MethodSource("argumentsStreamForList")
     public void createEquation_LIST(final String format, final List<String> allowedValues) {
-        parser.setFormat(format);
-        assertTrue(allowedValues.contains(parser.createEquationWithoutEscaping(random)));
+        assertTrue(allowedValues.contains(Parser.parseWithEscaping(random, format)));
     }
 
     @ParameterizedTest
     @MethodSource("argumentsStreamForComplexSyntax")
     public void createEquation_COMPLEX_SYNTAX(final String format, final List<String> allowedValues) {
-        parser.setFormat(format);
-        assertTrue(allowedValues.contains(parser.createEquationWithoutEscaping(random)));
+        assertTrue(allowedValues.contains(Parser.parseWithEscaping(random, format)));
     }
 
     @ParameterizedTest
     @MethodSource("argumentsStreamForVariables")
     public void createEquation_VARIABLES(final String format, final List<String> allowedValues) {
-        parser.setFormat(format);
-        String s = parser.createEquationWithoutEscaping(random);
-        assertTrue(allowedValues.contains(s));
+        assertTrue(allowedValues.contains(Parser.parseWithEscaping(random, format)));
     }
 
     @ParameterizedTest
     @MethodSource("argumentsStreamForInnerVariables")
     public void createEquation_INNER_VARIABLES(final String format, final List<String> allowedValues) {
-        parser.setFormat(format);
-        String s = parser.createEquationWithoutEscaping(random);
-        assertTrue(allowedValues.contains(s));
+        assertTrue(allowedValues.contains(Parser.parseWithEscaping(random, format)));
     }
 }
