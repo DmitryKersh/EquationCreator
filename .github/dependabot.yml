@@ -6,6 +6,7 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
     target-branch: development
+    reviewers: [ DmitryKersh ]
     labels:
       - dependencies
       - automatic
@@ -16,6 +17,7 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
     target-branch: development
+    reviewers: [ DmitryKersh ]
     labels:
       - dependencies
       - automatic
