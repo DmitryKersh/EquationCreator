@@ -5,7 +5,6 @@ on: [ pull_request, workflow_dispatch ]
 jobs:
   test:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'trusted')
 
     steps:
       - uses: actions/checkout@v2.5.0
