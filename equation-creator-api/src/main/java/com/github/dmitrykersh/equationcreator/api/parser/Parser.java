@@ -1,4 +1,4 @@
-package com.github.dmitrykersh.equationcreator.parser;
+package com.github.dmitrykersh.equationcreator.api.parser;
 
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 
-import static com.github.dmitrykersh.equationcreator.parser.ParserConstants.ParserRegexPatterns.*;
-import static com.github.dmitrykersh.equationcreator.parser.ParserConstants.ParserRegexStrings.*;
+import static com.github.dmitrykersh.equationcreator.api.parser.ParserConstants.ParserRegexPatterns.*;
+import static com.github.dmitrykersh.equationcreator.api.parser.ParserConstants.ParserRegexStrings.*;
 
 public class Parser {
     private String format;
